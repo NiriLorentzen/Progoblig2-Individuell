@@ -14,6 +14,9 @@ kWh-wealthy-consumer-data =
     sanitize energi using string-sanitizer
   end
 
+"Tabellen med stringverdi"
+kWh-wealthy-consumer-data
+
 fun energi-to-number(str :: String) -> Number:
   cases(Option) string-to-number(str):
     | some(a) => a
@@ -25,8 +28,8 @@ where:
 end
 
 ny_tabell = transform-column(kWh-wealthy-consumer-data, "energi", energi-to-number)
-
-
+"Tabellen etter string-to-number"
+ny_tabell
 
 #energiforbruket for bilbruk
 fun beregn_energibruk_bil(distance-travelled-per-day, distance-per-unit-of-fuel): #mpl = mil per liter
@@ -37,11 +40,30 @@ fun beregn_energibruk_bil(distance-travelled-per-day, distance-per-unit-of-fuel)
   beregn_energibruk_bil(10, 10) is 10
 end
 
+fun legg_til_bil_tabell(str :: String) -> Number:
+  cases(Option) string-to-number(str):
+    | some(a) => a
+    | none => beregn_energibruk_bil(10, 10)
+  end
+where:
+  energi-to-number("") is 0
+energi-to-number("48") is 48
+end
+
 distance-travelled-per-day = 15
 distance-per-unit-of-fuel = 17
 beregn_energibruk_bil(10, 10)
 
 total_energibruk_innbygger = sum(ny_tabell, "energi") + beregn_energibruk_bil(distance-travelled-per-day, distance-per-unit-of-fuel)
-"Total energibruk per innbygger: " + to-string(total_energibruk_innbygger)
+"Total energibruk per innbygger:"
+  total_energibruk_innbygger
 
+"Barchart uten bilverdi:"
 bar-chart(ny_tabell, "komponent", "energi")
+
+"Tabell med bilverdi:"
+total_tabell = transform-column(kWh-wealthy-consumer-data, "energi", legg_til_bil_tabell)
+total_tabell
+
+"Barchart med bilverdi:"
+bar-chart(total_tabell, "komponent", "energi")
